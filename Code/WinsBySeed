@@ -1,0 +1,26 @@
+library(tidyverse)
+library(readr)
+
+#Reading in and cleaning the data
+Wins <- read.csv("Insert File Path")
+Wins <- rename(Wins, Seed = X) %>% 
+  replace_na(list("ROund.of.32" = 0, "Sweet.16" = 0, "Elite.8" = 0, "Final.4" = 0, "Championship" = 0))
+
+#Rotating the data
+Wins_Long <- Wins %>% pivot_longer(cols = c("Round.of.32", "Sweet.16", "Elite.8","Final.4", "Championship"),
+                                   names_to = "Round",
+                                   values_to = "Appearances")
+
+#Setting the column names as factors for splitting the graph
+Wins_Long$Round <- factor(Wins_Long$Round, levels = c("Round.of.32", "Sweet.16", "Elite.8", "Final.4", "Championship"))
+
+#Creating the graph
+ggplot(Wins_Long, aes(x = Seed,
+                      y = Appearances)) +
+  geom_bar(stat = "identity", alpha = 0.5, fill = "firebrick2") +
+  geom_density(stat = "identity", geom = "line") +
+  facet_wrap(~ Round) +
+  scale_x_continuous(breaks = 1:16) + 
+  labs(title = "Appearances in Each NCAAT Round by Seed", subtitle = "Data from 2018-2021",
+       caption = "Data Visualization by David Roycroft | Data from ncaa.com") + 
+  theme(plot.title = element_text(hjust = 0.5)) + theme(plot.subtitle = element_text(hjust = 0.5))
